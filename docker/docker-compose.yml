@@ -1,0 +1,24 @@
+services:
+ 
+  db:
+    image: postgres:latest
+    command: -c 'max_connections=500'
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: grpc_db
+      PGPORT: ${POSTGRES_PORT}
+    expose:
+      - 5430
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - ../db/migration:/docker-entrypoint-initdb.d
+      - data-db:/var/lib/postgresql/data
+
+
+volumes:
+  data-db:
