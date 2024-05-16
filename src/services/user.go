@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	userPb "grpc-go/pb/user"
+	userPb "grpc-go/src/pb/user"
 
 	"github.com/google/uuid"
 )

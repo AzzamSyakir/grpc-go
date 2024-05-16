@@ -1,5 +1,5 @@
 generate-proto:
-	 protoc --proto_path=protos protos/*.proto --go_out=./ --go-grpc_out=./
+	 protoc --proto_path=src/proto src/proto/*.proto --go_out=./src --go-grpc_out=./src
 	 
 start-grpc:
 	go run cmd/main.go

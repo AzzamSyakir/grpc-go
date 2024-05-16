@@ -4,8 +4,8 @@ import (
 	"log"
 	"net"
 
-	"grpc-go/cmd/services"
-	userPb "grpc-go/pb/user"
+	userPb "grpc-go/src/pb/user"
+	"grpc-go/src/services"
 
 	"google.golang.org/grpc"
 )
