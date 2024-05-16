@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package grpc_go;
+
+option go_package = "pb/";
+
+service UserService{
+  rpc ListUsers(empty) returns (user);
+  rpc GetUser(id) returns (user);
+}
+
+message empty {}
+
+message user{
+  string id=1;
+  string name=2;
+  string email=3;
+  string password=4;
+} 
+message id {
+  string id=1;
+}
+

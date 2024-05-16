@@ -1,6 +1,6 @@
 syntax = "proto3";
 package grpc_go;
-option go_package = "/pb";
+option go_package = "pb/";
 
 message product {
   string id =1;

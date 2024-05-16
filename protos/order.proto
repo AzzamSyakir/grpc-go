@@ -1,0 +1,16 @@
+syntax = "proto3";
+package  order;
+option go_package = "pb/";
+
+message order {
+  string id =1;
+  string userId=2;
+  string receiptCode=3;
+  int64 totalPrice=4;
+  int64 totalPaid=5;
+  int64 totalRetrn=6;
+}
+
+message orderProducts {
+  
+} 
