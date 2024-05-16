@@ -1,6 +1,6 @@
 syntax = "proto3";
-package  category;
-option go_package = "pb/";
+package  grpc_go;
+option go_package = "pb/category";
 
 message category {
   string id =1;

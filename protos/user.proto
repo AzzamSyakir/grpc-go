@@ -1,8 +1,7 @@
 syntax = "proto3";
 
-package grpc_go;
-
-option go_package = "pb/";
+package  grpc_go;
+option go_package = "pb/user";
 
 service UserService{
   rpc ListUsers(empty) returns (user);
