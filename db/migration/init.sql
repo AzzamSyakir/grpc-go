@@ -4,7 +4,6 @@ create table IF NOT EXISTS users
     name text not null unique ,
     password TEXT not null  ,
     email TEXT not null unique ,
-    Balance int not null ,
     created_at timestamptz not null ,
     updated_at timestamptz not null ,
     deleted_at timestamptz

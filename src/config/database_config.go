@@ -16,7 +16,7 @@ type PostgresDatabase struct {
 	Connection *sql.DB
 }
 
-func GrpcDBConfig(envConfig *EnvConfig) *DatabaseConfig {
+func NewGrpcDBConfig(envConfig *EnvConfig) *DatabaseConfig {
 	databaseConfig := &DatabaseConfig{
 		GrpcDB: GrpcDB(envConfig),
 	}
