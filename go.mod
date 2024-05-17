@@ -3,6 +3,7 @@ module grpc-go
 go 1.22.3
 
 require (
+	github.com/golang/protobuf v1.5.4
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	google.golang.org/grpc v1.64.0

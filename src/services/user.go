@@ -8,6 +8,7 @@ import (
 	userPb "grpc-go/src/pb/user"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserService struct {
@@ -19,10 +20,9 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	var rows *sql.Rows
 	if err != nil {
-		rollback := begin.Rollback()
 		fmt.Println("begin error", err.Error())
 		result = nil
-		return result, rollback
+		return result, nil
 	}
 	var ListUsers []*userPb.User
 
@@ -54,6 +54,11 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 			result = nil
 			return result, rollback
 		}
+		ListUser = &userPb.User{
+			CreatedAt: timestamppb.New(createdAt),
+			UpdatedAt: timestamppb.New(updatedAt),
+		}
+
 		ListUsers = append(ListUsers, ListUser)
 	}
 	commit := begin.Commit()
