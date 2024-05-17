@@ -69,7 +69,7 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 	}
 	return response, commit
 }
-func (userService *UserService) GetUser(_ context.Context, id *userPb.Id) (result *userPb.GetUsersResponse, err error) {
+func (userService *UserService) GetUser(_ context.Context, id *userPb.ById) (result *userPb.GetUsersResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	var rows *sql.Rows
 	if err != nil {
