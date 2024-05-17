@@ -2,7 +2,7 @@ generate-proto:
 	 protoc --proto_path=src/proto src/proto/*.proto --go_out=./src --go-grpc_out=./src
 	 
 start-grpc:
-	go run cmd/main.go
+	clear && go run cmd/main.go
 	
 # docker command
 start-docker:

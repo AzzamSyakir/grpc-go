@@ -8,10 +8,15 @@ import (
 	userPb "grpc-go/src/pb/user"
 	"grpc-go/src/services"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	port := ":50051"
 	netListen, err := net.Listen("tcp", port)
 	if err != nil {

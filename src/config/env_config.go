@@ -26,14 +26,14 @@ func NewEnvConfig() *EnvConfig {
 	envConfig := &EnvConfig{
 		App: &AppEnv{
 			Host: os.Getenv("GATEWAY_APP_HOST"),
-			Port: os.Getenv("USER_SERVICES_PORT"),
+			Port: os.Getenv("SERVICES_PORT"),
 		},
 		GrpcDB: &PostgresEnv{
 			Host:     os.Getenv("POSTGRES_HOST"),
-			Port:     os.Getenv("POSTGRES_USER_PORT"),
+			Port:     os.Getenv("POSTGRES_PORT"),
 			User:     os.Getenv("POSTGRES_USER"),
 			Password: os.Getenv("POSTGRES_PASSWORD"),
-			Database: "user_db",
+			Database: "grpc_db",
 		},
 	}
 	return envConfig
