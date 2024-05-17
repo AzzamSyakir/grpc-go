@@ -27,8 +27,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	ListUsers(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*User, error)
-	GetUser(ctx context.Context, in *Id, opts ...grpc.CallOption) (*User, error)
+	ListUsers(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ListUserResponse, error)
+	GetUser(ctx context.Context, in *Id, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
 type userServiceClient struct {
@@ -39,8 +39,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) ListUsers(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
+func (c *userServiceClient) ListUsers(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ListUserResponse, error) {
+	out := new(ListUserResponse)
 	err := c.cc.Invoke(ctx, UserService_ListUsers_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -48,8 +48,8 @@ func (c *userServiceClient) ListUsers(ctx context.Context, in *Empty, opts ...gr
 	return out, nil
 }
 
-func (c *userServiceClient) GetUser(ctx context.Context, in *Id, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
+func (c *userServiceClient) GetUser(ctx context.Context, in *Id, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -61,8 +61,8 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *Id, opts ...grpc.Ca
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	ListUsers(context.Context, *Empty) (*User, error)
-	GetUser(context.Context, *Id) (*User, error)
+	ListUsers(context.Context, *Empty) (*ListUserResponse, error)
+	GetUser(context.Context, *Id) (*UserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -70,10 +70,10 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) ListUsers(context.Context, *Empty) (*User, error) {
+func (UnimplementedUserServiceServer) ListUsers(context.Context, *Empty) (*ListUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
 }
-func (UnimplementedUserServiceServer) GetUser(context.Context, *Id) (*User, error) {
+func (UnimplementedUserServiceServer) GetUser(context.Context, *Id) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}

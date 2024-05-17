@@ -1,22 +1,36 @@
 syntax = "proto3";
-
 package  grpc_go;
+
+import "google/protobuf/timestamp.proto";
+
 option go_package = "pb/user";
 
+
 service UserService{
-  rpc ListUsers(empty) returns (user);
-  rpc GetUser(id) returns (user);
+  rpc ListUsers(empty) returns (ListUserResponse);
+  rpc GetUser(id) returns (userResponse);
 }
 
-message empty {}
-
-message user{
+message userResponse{
   string id=1;
   string name=2;
   string email=3;
   string password=4;
-} 
+   google.protobuf.Timestamp created_at=5;
+   google.protobuf.Timestamp updated_at=6;
+   google.protobuf.Timestamp deleted_at=7;
+}
+
 message id {
   string id=1;
 }
+
+message empty {}
+
+message ListUserResponse{
+  int64 code=1;
+  string message=2;
+  repeated userResponse data=3;
+}
+
 
