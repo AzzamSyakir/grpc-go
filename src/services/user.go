@@ -106,6 +106,8 @@ func (userService *UserService) GetUser(_ context.Context, id *userPb.ById) (res
 			result = nil
 			return result, rollback
 		}
+		user.CreatedAt = timestamppb.New(createdAt)
+		user.UpdatedAt = timestamppb.New(createdAt)
 		UserData = append(UserData, user)
 	}
 	commit := begin.Commit()
