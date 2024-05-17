@@ -54,10 +54,8 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 			result = nil
 			return result, rollback
 		}
-		ListUser = &userPb.User{
-			CreatedAt: timestamppb.New(createdAt),
-			UpdatedAt: timestamppb.New(updatedAt),
-		}
+		ListUser.CreatedAt = timestamppb.New(createdAt)
+		ListUser.UpdatedAt = timestamppb.New(createdAt)
 
 		ListUsers = append(ListUsers, ListUser)
 	}
