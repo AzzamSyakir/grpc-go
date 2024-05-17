@@ -15,7 +15,7 @@ type UserService struct {
 	DB *config.DatabaseConfig
 }
 
-func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (result *userPb.ListUserResponse, err error) {
+func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (result *userPb.ListUsersResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	var rows *sql.Rows
 	if err != nil {
@@ -24,7 +24,7 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 		result = nil
 		return result, rollback
 	}
-	var ListUsers []*userPb.UserResponse
+	var ListUsers []*userPb.User
 
 	rows, err = begin.Query(
 		`SELECT id, name, email, password,  created_at, updated_at FROM users`,
@@ -37,7 +37,7 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 	}
 	defer rows.Close()
 	for rows.Next() {
-		ListUser := &userPb.UserResponse{}
+		ListUser := &userPb.User{}
 		createdAt := ListUser.CreatedAt.AsTime()
 		updatedAt := ListUser.UpdatedAt.AsTime()
 		err = rows.Scan(
@@ -57,10 +57,59 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 		ListUsers = append(ListUsers, ListUser)
 	}
 	commit := begin.Commit()
-	response := &userPb.ListUserResponse{
+	response := &userPb.ListUsersResponse{
 		Code:    int64(codes.OK),
 		Message: "ListUser Succeed",
 		Data:    ListUsers,
+	}
+	return response, commit
+}
+func (userService *UserService) GetUser(_ context.Context, id *userPb.Id) (result *userPb.GetUsersResponse, err error) {
+	begin, err := userService.DB.GrpcDB.Connection.Begin()
+	var rows *sql.Rows
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("begin error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	rows, err = begin.Query(
+		`SELECT id, name, email, password, created_at, updated_at FROM "users" WHERE id=$1 LIMIT 1;`,
+		id.Id,
+	)
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("query error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	defer rows.Close()
+	var UserData []*userPb.User
+	for rows.Next() {
+		user := &userPb.User{}
+		createdAt := user.CreatedAt.AsTime()
+		updatedAt := user.UpdatedAt.AsTime()
+		err = rows.Scan(
+			&user.Id,
+			&user.Name,
+			&user.Email,
+			&user.Password,
+			&createdAt,
+			&updatedAt,
+		)
+		if err != nil {
+			rollback := begin.Rollback()
+			fmt.Println("scan error", err.Error())
+			result = nil
+			return result, rollback
+		}
+		UserData = append(UserData, user)
+	}
+	commit := begin.Commit()
+	response := &userPb.GetUsersResponse{
+		Code:    int64(codes.OK),
+		Message: "ListUser Succeed",
+		Data:    UserData[0],
 	}
 	return response, commit
 }

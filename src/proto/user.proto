@@ -7,18 +7,18 @@ option go_package = "pb/user";
 
 
 service UserService{
-  rpc ListUsers(empty) returns (ListUserResponse);
-  rpc GetUser(id) returns (userResponse);
+  rpc ListUsers(empty) returns (ListUsersResponse);
+  rpc GetUser(id) returns (GetUsersResponse);
 }
 
-message userResponse{
+message User{
   string id=1;
   string name=2;
   string email=3;
   string password=4;
-   google.protobuf.Timestamp created_at=5;
-   google.protobuf.Timestamp updated_at=6;
-   google.protobuf.Timestamp deleted_at=7;
+  google.protobuf.Timestamp created_at=5;
+  google.protobuf.Timestamp updated_at=6;
+  google.protobuf.Timestamp deleted_at=7;
 }
 
 message id {
@@ -27,10 +27,13 @@ message id {
 
 message empty {}
 
-message ListUserResponse{
+message ListUsersResponse{
   int64 code=1;
   string message=2;
-  repeated userResponse data=3;
+  repeated User data=3;
 }
-
-
+message GetUsersResponse{
+  int64 code=1;
+  string message=2;
+  User data=3;
+}
