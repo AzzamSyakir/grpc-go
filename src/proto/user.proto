@@ -11,7 +11,7 @@ service UserService{
   rpc DeleteUser(ById) returns (DeleteUserResponse);
   rpc DetailUser(ById) returns (DetailUserResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc UpdateUser(ById) returns (GetUsersResponse);
+  rpc UpdateUser(ById) returns (UpdateUserResponse);
 }
 
 message User{
@@ -39,11 +39,6 @@ message ListUsersResponse{
   repeated User data=3;
 }
 message DeleteUserResponse{
-  int64 code=1;
-  string message=2;
-  User data=3;
-}
-message GetUsersResponse{
   int64 code=1;
   string message=2;
   User data=3;
