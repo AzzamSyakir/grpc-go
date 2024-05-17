@@ -67,6 +67,58 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 	}
 	return response, commit
 }
+func (userService *UserService) DeleteUser(_ context.Context, id *userPb.ById) (result *userPb.DeleteUserResponse, err error) {
+	begin, err := userService.DB.GrpcDB.Connection.Begin()
+	var rows *sql.Rows
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("begin error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	rows, err = begin.Query(
+		`DELETE FROM "users" WHERE id=$1 RETURNING id, name,  email, password, created_at, updated_at`,
+		id.Id,
+	)
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("query error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	defer rows.Close()
+	var UserData []*userPb.User
+	for rows.Next() {
+		user := &userPb.User{}
+		createdAt := user.CreatedAt.AsTime()
+		updatedAt := user.UpdatedAt.AsTime()
+		err = rows.Scan(
+			&user.Id,
+			&user.Name,
+			&user.Email,
+			&user.Password,
+			&createdAt,
+			&updatedAt,
+		)
+		if err != nil {
+			rollback := begin.Rollback()
+			fmt.Println("scan error", err.Error())
+			result = nil
+			return result, rollback
+		}
+		user.CreatedAt = timestamppb.New(createdAt)
+		user.UpdatedAt = timestamppb.New(createdAt)
+		UserData = append(UserData, user)
+	}
+	commit := begin.Commit()
+	response := &userPb.DeleteUserResponse{
+		Code:    int64(codes.OK),
+		Message: "DeleteUser Succeed",
+		Data:    UserData[0],
+	}
+	return response, commit
+}
+
 func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (result *userPb.DetailUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	var rows *sql.Rows
