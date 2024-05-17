@@ -10,7 +10,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 )
@@ -23,22 +22,9 @@ const (
 )
 
 type UserResponse struct {
-type UserResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	Id        string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Email     string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Password  string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-}
-
-func (x *UserResponse) Reset() {
-	*x = UserResponse{}
 
 	Id        string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
@@ -59,14 +45,11 @@ func (x *UserResponse) Reset() {
 }
 
 func (x *UserResponse) String() string {
-func (x *UserResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
 func (*UserResponse) ProtoMessage() {}
-func (*UserResponse) ProtoMessage() {}
 
-func (x *UserResponse) ProtoReflect() protoreflect.Message {
 func (x *UserResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_user_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
@@ -81,12 +64,9 @@ func (x *UserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserResponse.ProtoReflect.Descriptor instead.
 func (*UserResponse) Descriptor() ([]byte, []int) {
-// Deprecated: Use UserResponse.ProtoReflect.Descriptor instead.
-func (*UserResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *UserResponse) GetId() string {
 func (x *UserResponse) GetId() string {
 	if x != nil {
 		return x.Id
@@ -95,14 +75,12 @@ func (x *UserResponse) GetId() string {
 }
 
 func (x *UserResponse) GetName() string {
-func (x *UserResponse) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *UserResponse) GetEmail() string {
 func (x *UserResponse) GetEmail() string {
 	if x != nil {
 		return x.Email
@@ -111,32 +89,10 @@ func (x *UserResponse) GetEmail() string {
 }
 
 func (x *UserResponse) GetPassword() string {
-func (x *UserResponse) GetPassword() string {
 	if x != nil {
 		return x.Password
 	}
 	return ""
-}
-
-func (x *UserResponse) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *UserResponse) GetUpdatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return nil
-}
-
-func (x *UserResponse) GetDeletedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.DeletedAt
-	}
-	return nil
 }
 
 func (x *UserResponse) GetCreatedAt() *timestamppb.Timestamp {
@@ -172,7 +128,6 @@ func (x *Id) Reset() {
 	*x = Id{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_user_proto_msgTypes[1]
-		mi := &file_user_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -186,7 +141,6 @@ func (*Id) ProtoMessage() {}
 
 func (x *Id) ProtoReflect() protoreflect.Message {
 	mi := &file_user_proto_msgTypes[1]
-	mi := &file_user_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -199,7 +153,6 @@ func (x *Id) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Id.ProtoReflect.Descriptor instead.
 func (*Id) Descriptor() ([]byte, []int) {
-	return file_user_proto_rawDescGZIP(), []int{1}
 	return file_user_proto_rawDescGZIP(), []int{1}
 }
 
@@ -368,13 +321,7 @@ func file_user_proto_rawDescGZIP() []byte {
 }
 
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_user_proto_goTypes = []interface{}{
-	(*UserResponse)(nil),          // 0: grpc_go.userResponse
-	(*Id)(nil),                    // 1: grpc_go.id
-	(*Empty)(nil),                 // 2: grpc_go.empty
-	(*ListUserResponse)(nil),      // 3: grpc_go.ListUserResponse
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 	(*UserResponse)(nil),          // 0: grpc_go.userResponse
 	(*Id)(nil),                    // 1: grpc_go.id
 	(*Empty)(nil),                 // 2: grpc_go.empty
@@ -382,19 +329,6 @@ var file_user_proto_goTypes = []interface{}{
 	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
 }
 var file_user_proto_depIdxs = []int32{
-	4, // 0: grpc_go.userResponse.created_at:type_name -> google.protobuf.Timestamp
-	4, // 1: grpc_go.userResponse.updated_at:type_name -> google.protobuf.Timestamp
-	4, // 2: grpc_go.userResponse.deleted_at:type_name -> google.protobuf.Timestamp
-	0, // 3: grpc_go.ListUserResponse.data:type_name -> grpc_go.userResponse
-	2, // 4: grpc_go.UserService.ListUsers:input_type -> grpc_go.empty
-	1, // 5: grpc_go.UserService.GetUser:input_type -> grpc_go.id
-	3, // 6: grpc_go.UserService.ListUsers:output_type -> grpc_go.ListUserResponse
-	0, // 7: grpc_go.UserService.GetUser:output_type -> grpc_go.userResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
 	4, // 0: grpc_go.userResponse.created_at:type_name -> google.protobuf.Timestamp
 	4, // 1: grpc_go.userResponse.updated_at:type_name -> google.protobuf.Timestamp
 	4, // 2: grpc_go.userResponse.deleted_at:type_name -> google.protobuf.Timestamp
@@ -418,7 +352,6 @@ func file_user_proto_init() {
 	if !protoimpl.UnsafeEnabled {
 		file_user_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UserResponse); i {
-			switch v := v.(*UserResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -431,7 +364,6 @@ func file_user_proto_init() {
 		}
 		file_user_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Id); i {
-			switch v := v.(*Id); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -443,19 +375,6 @@ func file_user_proto_init() {
 			}
 		}
 		file_user_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Empty); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_user_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListUserResponse); i {
 			switch v := v.(*Empty); i {
 			case 0:
 				return &v.state
@@ -486,7 +405,6 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_user_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   4,
 			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
