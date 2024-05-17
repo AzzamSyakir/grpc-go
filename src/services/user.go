@@ -3,10 +3,11 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"grpc-go/src/config"
-	"grpc-go/src/entity"
 	userPb "grpc-go/src/pb/user"
-	"log"
+
+	"google.golang.org/grpc/codes"
 )
 
 type UserService struct {
@@ -14,43 +15,52 @@ type UserService struct {
 	DB *config.DatabaseConfig
 }
 
-func (u *UserService) ListUsers(context.Context, *userPb.Empty) (result *userPb.User, err error) {
-	begin, err := u.DB.GrpcDB.Connection.Begin()
+func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (result *userPb.ListUserResponse, err error) {
+	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	var rows *sql.Rows
 	if err != nil {
 		rollback := begin.Rollback()
-		log.Printf("begin error %v", err.Error())
+		fmt.Println("begin error", err.Error())
 		result = nil
 		return result, rollback
 	}
+	var ListUsers []*userPb.UserResponse
+
 	rows, err = begin.Query(
-		`SELECT id, name, email, password, created_at, updated_at, deleted_at FROM "users" `,
+		`SELECT id, name, email, password,  created_at, updated_at FROM users`,
 	)
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("query error", err.Error())
+		result = nil
+		return result, rollback
+	}
 	defer rows.Close()
-	var ListUsers []*entity.User
 	for rows.Next() {
-		ListUser := &entity.User{}
-		scanErr := rows.Scan(
+		ListUser := &userPb.UserResponse{}
+		createdAt := ListUser.CreatedAt.AsTime()
+		updatedAt := ListUser.UpdatedAt.AsTime()
+		err = rows.Scan(
 			&ListUser.Id,
 			&ListUser.Name,
 			&ListUser.Email,
 			&ListUser.Password,
-			&ListUser.CreatedAt,
-			&ListUser.UpdatedAt,
-			&ListUser.DeletedAt,
+			&createdAt,
+			&updatedAt,
 		)
-		if scanErr != nil {
+		if err != nil {
+			rollback := begin.Rollback()
+			fmt.Println("scan error", err.Error())
 			result = nil
-			err = scanErr
-			return result, err
+			return result, rollback
 		}
-		ListUsers = append(ListUsers, ListUser)
+		_ = append(ListUsers, ListUser)
 	}
-	if err != nil {
-		rollback := begin.Rollback()
-		log.Printf("query error %v", err.Error())
-		result = nil
-		return result, rollback
+	commit := begin.Commit()
+	response := &userPb.ListUserResponse{
+		Code:    int64(codes.OK),
+		Message: "ListUser Success",
 	}
-	return ListUsers, nil
+	fmt.Println("response", response)
+	return response, commit
 }
