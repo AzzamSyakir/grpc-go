@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"grpc-go/src/config"
 	userPb "grpc-go/src/pb/user"
+	"time"
 
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -18,14 +21,13 @@ type UserService struct {
 
 func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (result *userPb.ListUsersResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
-	var rows *sql.Rows
 	if err != nil {
 		fmt.Println("begin error", err.Error())
 		result = nil
 		return result, nil
 	}
+	var rows *sql.Rows
 	var ListUsers []*userPb.User
-
 	rows, err = begin.Query(
 		`SELECT id, name, email, password,  created_at, updated_at FROM users`,
 	)
@@ -69,13 +71,13 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 }
 func (userService *UserService) DeleteUser(_ context.Context, id *userPb.ById) (result *userPb.DeleteUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
-	var rows *sql.Rows
 	if err != nil {
 		rollback := begin.Rollback()
 		fmt.Println("begin error", err.Error())
 		result = nil
 		return result, rollback
 	}
+	var rows *sql.Rows
 	rows, err = begin.Query(
 		`DELETE FROM "users" WHERE id=$1 RETURNING id, name,  email, password, created_at, updated_at`,
 		id.Id,
@@ -121,13 +123,13 @@ func (userService *UserService) DeleteUser(_ context.Context, id *userPb.ById) (
 
 func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (result *userPb.DetailUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
-	var rows *sql.Rows
 	if err != nil {
 		rollback := begin.Rollback()
 		fmt.Println("begin error", err.Error())
 		result = nil
 		return result, rollback
 	}
+	var rows *sql.Rows
 	rows, err = begin.Query(
 		`SELECT id, name, email, password, created_at, updated_at FROM "users" WHERE id=$1 LIMIT 1;`,
 		id.Id,
@@ -167,6 +169,53 @@ func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (
 		Code:    int64(codes.OK),
 		Message: "ListUser Succeed",
 		Data:    UserData[0],
+	}
+	return response, commit
+}
+func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *userPb.CreateUserRequest) (result *userPb.CreateUserResponse, err error) {
+	begin, err := userService.DB.GrpcDB.Connection.Begin()
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("begin error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	userId := uuid.New()
+	time := time.Now()
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(toCreateUser.Password), bcrypt.DefaultCost)
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("begin error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	_, err = begin.Query(
+		`INSERT INTO "users" (id, name, email, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6);`,
+		userId,
+		toCreateUser.Name,
+		toCreateUser.Email,
+		hashedPassword,
+		time,
+		time,
+	)
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("query error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	commit := begin.Commit()
+	response := &userPb.CreateUserResponse{
+		Code:    int64(codes.OK),
+		Message: "CreateUser Succes",
+		Data: &userPb.User{
+			Id:        userId.String(),
+			Name:      toCreateUser.Name,
+			Email:     toCreateUser.Email,
+			Password:  string(hashedPassword),
+			CreatedAt: timestamppb.New(time),
+			UpdatedAt: timestamppb.New(time),
+		},
 	}
 	return response, commit
 }
