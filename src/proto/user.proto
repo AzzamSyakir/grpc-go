@@ -11,7 +11,7 @@ service UserService{
   rpc DeleteUser(ById) returns (DeleteUserResponse);
   rpc DetailUser(ById) returns (DetailUserResponse);
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
-  rpc UpdateUser(ById) returns (UpdateUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
 }
 
 message User{
@@ -59,7 +59,8 @@ message UpdateUserResponse{
   User data=3;
 }
 message UpdateUserRequest{
-  optional string name=1;
-  optional string email=2;
-  optional string password=3;
+  string id=1;
+  optional string name=2;
+  optional string email=3;
+  optional string password=4;
 }

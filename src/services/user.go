@@ -223,8 +223,9 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	return response, commit
 }
 
-func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *userPb.UpdateUserRequest, userId *userPb.ById) (result *userPb.UpdateUserResponse, err error) {
+func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *userPb.UpdateUserRequest) (result *userPb.UpdateUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
+	userId := toUpdateUser.Id
 	if err != nil {
 		result = &userPb.UpdateUserResponse{
 			Message: "UpdateUser failed, begin fail,  " + err.Error(),
@@ -232,57 +233,101 @@ func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *us
 		rollback := begin.Rollback()
 		return result, rollback
 	}
-	time := time.Now()
-	var hashedPassword []byte
-	if toUpdateUser.Password != nil {
-		hashedPassword, err = bcrypt.GenerateFromPassword([]byte(*toUpdateUser.Password), bcrypt.DefaultCost)
-		if err != nil {
-			result = &userPb.UpdateUserResponse{
-				Message: "UpdateUser failed, hashing password fail, " + err.Error(),
-			}
-			rollback := begin.Rollback()
-			return result, rollback
+	if userId == "" {
+		rollback := begin.Rollback()
+		result = &userPb.UpdateUserResponse{
+			Message: "UpdateUser failed, id cannot be empty",
 		}
+		return result, rollback
 	}
 	rows, err := begin.Query(
-		`SELECT id, name, email, password, balance, created_at, updated_at, deleted_at FROM "users" WHERE id=$1 LIMIT 1;`,
+		`SELECT id, name, email, password, created_at, updated_at FROM users WHERE id=$1 LIMIT 1;`,
 		userId,
 	)
-
 	if err != nil {
 		result = &userPb.UpdateUserResponse{
-			Message: "UpdateUser failed, query GetUserById fail, " + err.Error(),
+			Message: "UpdateUser failed, query GetUserById fail," + err.Error(),
 		}
 		rollback := begin.Rollback()
 		return result, rollback
 	}
 	defer rows.Close()
+	var foundUser []*userPb.User
+	for rows.Next() {
+		user := &userPb.User{}
+		createdAt := user.CreatedAt.AsTime()
+		updatedAt := user.UpdatedAt.AsTime()
+		err = rows.Scan(
+			&user.Id,
+			&user.Name,
+			&user.Email,
+			&user.Password,
+			&createdAt,
+			&updatedAt,
+		)
+		foundUser = append(foundUser, user)
+		if err != nil {
+			result = &userPb.UpdateUserResponse{
+				Message: "UpdateUser failed, query GetUserById scan fail, " + err.Error(),
+			}
+			rollback := begin.Rollback()
+			return result, rollback
+		}
+	}
+	updatedUser := foundUser[0]
+	if updatedUser == nil {
+		result = &userPb.UpdateUserResponse{
+			Message: "UpdateUser failed, UserData is empty",
+		}
+		rollback := begin.Rollback()
+		return result, rollback
+	}
+	if toUpdateUser.Name != nil {
+		updatedUser.Name = *toUpdateUser.Name
+	}
+	if toUpdateUser.Email != nil {
+		updatedUser.Email = *toUpdateUser.Email
+	}
+	if toUpdateUser.Password != nil {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*toUpdateUser.Password), bcrypt.DefaultCost)
+		if err != nil {
+			result = &userPb.UpdateUserResponse{
+				Message: "UpdateUser failed, hashing password fail" + err.Error(),
+			}
+			rollback := begin.Rollback()
+			return result, rollback
+		}
+		updatedUser.Password = string(hashedPassword)
+	}
+	updatedAt := time.Now()
+	updatedUser.UpdatedAt = timestamppb.New(updatedAt)
 	_, err = begin.Query(
-		`INSERT INTO "users" (id, name, email, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6);`,
+		`UPDATE users SET name=$1, email=$2, password=$3, created_at=$4, updated_at=$5 WHERE id=$6;`,
+		updatedUser.Name,
+		updatedUser.Email,
+		updatedUser.Password,
+		updatedUser.CreatedAt.AsTime(),
+		updatedAt,
 		userId,
-		toUpdateUser.Name,
-		toUpdateUser.Email,
-		hashedPassword,
-		time,
-		time,
 	)
 	if err != nil {
+		result = &userPb.UpdateUserResponse{
+			Message: "UpdateUser failed, query Update fail, " + err.Error(),
+		}
 		rollback := begin.Rollback()
-		fmt.Println("query error", err.Error())
-		result = nil
 		return result, rollback
 	}
 	commit := begin.Commit()
 	response := &userPb.UpdateUserResponse{
 		Code:    int64(codes.OK),
-		Message: "CreateUser Succes",
+		Message: "UpdateUser Succeed",
 		Data: &userPb.User{
-			Id:        userId.String(),
-			Name:      toUpdateUser.Name,
-			Email:     toUpdateUser.Email,
-			Password:  string(hashedPassword),
-			CreatedAt: timestamppb.New(time),
-			UpdatedAt: timestamppb.New(time),
+			Id:        userId,
+			Name:      updatedUser.Name,
+			Email:     updatedUser.Email,
+			Password:  updatedUser.Password,
+			CreatedAt: updatedUser.CreatedAt,
+			UpdatedAt: updatedUser.UpdatedAt,
 		},
 	}
 	return response, commit
