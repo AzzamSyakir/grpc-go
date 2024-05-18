@@ -175,18 +175,20 @@ func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (
 func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *userPb.CreateUserRequest) (result *userPb.CreateUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	if err != nil {
+		result = &userPb.CreateUserResponse{
+			Message: "CreateUser failed, begin fail" + err.Error(),
+		}
 		rollback := begin.Rollback()
-		fmt.Println("begin error", err.Error())
-		result = nil
 		return result, rollback
 	}
 	userId := uuid.New()
 	time := time.Now()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(toCreateUser.Password), bcrypt.DefaultCost)
 	if err != nil {
+		result = &userPb.CreateUserResponse{
+			Message: "CreateUser failed, hashing password fail" + err.Error(),
+		}
 		rollback := begin.Rollback()
-		fmt.Println("begin error", err.Error())
-		result = nil
 		return result, rollback
 	}
 	_, err = begin.Query(
@@ -199,15 +201,16 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 		time,
 	)
 	if err != nil {
+		result = &userPb.CreateUserResponse{
+			Message: "CreateUser failed, query fail" + err.Error(),
+		}
 		rollback := begin.Rollback()
-		fmt.Println("query error", err.Error())
-		result = nil
 		return result, rollback
 	}
 	commit := begin.Commit()
 	response := &userPb.CreateUserResponse{
 		Code:    int64(codes.OK),
-		Message: "CreateUser Succes",
+		Message: "CreateUser Succeed",
 		Data: &userPb.User{
 			Id:        userId.String(),
 			Name:      toCreateUser.Name,
@@ -219,11 +222,12 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	}
 	return response, commit
 }
+
 func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *userPb.UpdateUserRequest, userId *userPb.ById) (result *userPb.UpdateUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	if err != nil {
 		result = &userPb.UpdateUserResponse{
-			Message: "begin failed, " + err.Error(),
+			Message: "UpdateUser failed, begin fail,  " + err.Error(),
 		}
 		rollback := begin.Rollback()
 		return result, rollback
