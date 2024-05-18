@@ -58,3 +58,8 @@ message UpdateUserResponse{
   string message=2;
   User data=3;
 }
+message UpdateUserRequest{
+  optional string name=1;
+  optional string email=2;
+  optional string password=3;
+}

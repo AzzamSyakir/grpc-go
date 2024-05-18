@@ -219,3 +219,67 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	}
 	return response, commit
 }
+func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *userPb.UpdateUserRequest, userId *userPb.ById) (result *userPb.UpdateUserResponse, err error) {
+	begin, err := userService.DB.GrpcDB.Connection.Begin()
+	if err != nil {
+		result = &userPb.UpdateUserResponse{
+			Message: "begin failed, " + err.Error(),
+		}
+		rollback := begin.Rollback()
+		return result, rollback
+	}
+	time := time.Now()
+	var hashedPassword []byte
+	if toUpdateUser.Password != nil {
+		hashedPassword, err = bcrypt.GenerateFromPassword([]byte(*toUpdateUser.Password), bcrypt.DefaultCost)
+		if err != nil {
+			result = &userPb.UpdateUserResponse{
+				Message: "UpdateUser failed, hashing password fail, " + err.Error(),
+			}
+			rollback := begin.Rollback()
+			return result, rollback
+		}
+	}
+	rows, err := begin.Query(
+		`SELECT id, name, email, password, balance, created_at, updated_at, deleted_at FROM "users" WHERE id=$1 LIMIT 1;`,
+		userId,
+	)
+
+	if err != nil {
+		result = &userPb.UpdateUserResponse{
+			Message: "UpdateUser failed, query GetUserById fail, " + err.Error(),
+		}
+		rollback := begin.Rollback()
+		return result, rollback
+	}
+	defer rows.Close()
+	_, err = begin.Query(
+		`INSERT INTO "users" (id, name, email, password, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6);`,
+		userId,
+		toUpdateUser.Name,
+		toUpdateUser.Email,
+		hashedPassword,
+		time,
+		time,
+	)
+	if err != nil {
+		rollback := begin.Rollback()
+		fmt.Println("query error", err.Error())
+		result = nil
+		return result, rollback
+	}
+	commit := begin.Commit()
+	response := &userPb.UpdateUserResponse{
+		Code:    int64(codes.OK),
+		Message: "CreateUser Succes",
+		Data: &userPb.User{
+			Id:        userId.String(),
+			Name:      toUpdateUser.Name,
+			Email:     toUpdateUser.Email,
+			Password:  string(hashedPassword),
+			CreatedAt: timestamppb.New(time),
+			UpdatedAt: timestamppb.New(time),
+		},
+	}
+	return response, commit
+}
