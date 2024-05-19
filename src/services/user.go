@@ -248,12 +248,12 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	}
 	return response, commit
 }
-
 func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *userPb.UpdateUserRequest) (result *userPb.UpdateUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	userId := toUpdateUser.Id
 	if err != nil {
 		result = &userPb.UpdateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "UpdateUser failed, begin fail,  " + err.Error(),
 		}
 		rollback := begin.Rollback()
@@ -262,6 +262,7 @@ func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *us
 	if userId == "" {
 		rollback := begin.Rollback()
 		result = &userPb.UpdateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "UpdateUser failed, id cannot be empty",
 		}
 		return result, rollback
@@ -272,6 +273,7 @@ func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *us
 	)
 	if err != nil {
 		result = &userPb.UpdateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "UpdateUser failed, query GetUserById fail," + err.Error(),
 		}
 		rollback := begin.Rollback()
@@ -294,6 +296,7 @@ func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *us
 		foundUser = append(foundUser, user)
 		if err != nil {
 			result = &userPb.UpdateUserResponse{
+				Code:    int64(codes.Aborted),
 				Message: "UpdateUser failed, query GetUserById scan fail, " + err.Error(),
 			}
 			rollback := begin.Rollback()
@@ -303,6 +306,7 @@ func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *us
 	updatedUser := foundUser[0]
 	if updatedUser == nil {
 		result = &userPb.UpdateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "UpdateUser failed, UserData is empty",
 		}
 		rollback := begin.Rollback()
@@ -338,6 +342,7 @@ func (userService *UserService) UpdateUser(ctx context.Context, toUpdateUser *us
 	)
 	if err != nil {
 		result = &userPb.UpdateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "UpdateUser failed, query Update fail, " + err.Error(),
 		}
 		rollback := begin.Rollback()
