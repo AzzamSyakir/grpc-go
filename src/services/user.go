@@ -22,9 +22,12 @@ type UserService struct {
 func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (result *userPb.ListUsersResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	if err != nil {
-		fmt.Println("begin error", err.Error())
-		result = nil
-		return result, nil
+		rollback := begin.Rollback()
+		response := &userPb.ListUsersResponse{
+			Code:    int64(codes.Aborted),
+			Message: "ListUser failed, begin fail, " + err.Error(),
+		}
+		return response, rollback
 	}
 	var rows *sql.Rows
 	var ListUsers []*userPb.User
@@ -33,9 +36,11 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 	)
 	if err != nil {
 		rollback := begin.Rollback()
-		fmt.Println("query error", err.Error())
-		result = nil
-		return result, rollback
+		response := &userPb.ListUsersResponse{
+			Code:    int64(codes.Aborted),
+			Message: "ListUser failed, query fail, " + err.Error(),
+		}
+		return response, rollback
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -52,9 +57,11 @@ func (userService *UserService) ListUsers(context.Context, *userPb.Empty) (resul
 		)
 		if err != nil {
 			rollback := begin.Rollback()
-			fmt.Println("scan error", err.Error())
-			result = nil
-			return result, rollback
+			response := &userPb.ListUsersResponse{
+				Code:    int64(codes.Aborted),
+				Message: "ListUser failed, scan fail, " + err.Error(),
+			}
+			return response, rollback
 		}
 		ListUser.CreatedAt = timestamppb.New(createdAt)
 		ListUser.UpdatedAt = timestamppb.New(createdAt)
