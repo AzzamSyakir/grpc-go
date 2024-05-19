@@ -199,6 +199,7 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	if err != nil {
 		result = &userPb.CreateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "CreateUser failed, begin fail" + err.Error(),
 		}
 		rollback := begin.Rollback()
@@ -209,6 +210,7 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(toCreateUser.Password), bcrypt.DefaultCost)
 	if err != nil {
 		result = &userPb.CreateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "CreateUser failed, hashing password fail" + err.Error(),
 		}
 		rollback := begin.Rollback()
@@ -225,6 +227,7 @@ func (userService *UserService) CreateUser(ctx context.Context, toCreateUser *us
 	)
 	if err != nil {
 		result = &userPb.CreateUserResponse{
+			Code:    int64(codes.Aborted),
 			Message: "CreateUser failed, query fail" + err.Error(),
 		}
 		rollback := begin.Rollback()
