@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"grpc-go/src/config"
 	userPb "grpc-go/src/pb/user"
 	"time"
@@ -136,14 +135,16 @@ func (userService *UserService) DeleteUser(_ context.Context, id *userPb.ById) (
 	}
 	return response, commit
 }
-
 func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (result *userPb.DetailUserResponse, err error) {
 	begin, err := userService.DB.GrpcDB.Connection.Begin()
 	if err != nil {
 		rollback := begin.Rollback()
-		fmt.Println("begin error", err.Error())
-		result = nil
-		return result, rollback
+		response := &userPb.DetailUserResponse{
+			Code:    int64(codes.Aborted),
+			Message: "DetailUser failed, begin fail, " + err.Error(),
+			Data:    nil,
+		}
+		return response, rollback
 	}
 	var rows *sql.Rows
 	rows, err = begin.Query(
@@ -152,9 +153,12 @@ func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (
 	)
 	if err != nil {
 		rollback := begin.Rollback()
-		fmt.Println("query error", err.Error())
-		result = nil
-		return result, rollback
+		response := &userPb.DetailUserResponse{
+			Code:    int64(codes.Aborted),
+			Message: "DetailUser failed, query fail, " + err.Error(),
+			Data:    nil,
+		}
+		return response, rollback
 	}
 	defer rows.Close()
 	var UserData []*userPb.User
@@ -172,9 +176,12 @@ func (userService *UserService) DetailUser(_ context.Context, id *userPb.ById) (
 		)
 		if err != nil {
 			rollback := begin.Rollback()
-			fmt.Println("scan error", err.Error())
-			result = nil
-			return result, rollback
+			response := &userPb.DetailUserResponse{
+				Code:    int64(codes.Aborted),
+				Message: "DetailUser failed, scan fail, " + err.Error(),
+				Data:    nil,
+			}
+			return response, rollback
 		}
 		user.CreatedAt = timestamppb.New(createdAt)
 		user.UpdatedAt = timestamppb.New(createdAt)
