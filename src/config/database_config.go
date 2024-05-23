@@ -27,7 +27,7 @@ func GrpcDB(envConfig *EnvConfig) *PostgresDatabase {
 	var url string
 	if envConfig.GrpcDB.Password == "" {
 		url = fmt.Sprintf(
-			"postgresql://%s@%s:%s/%s",
+			"postgresql://%s@%s:%s/%s?sslmode=disable",
 			envConfig.GrpcDB.User,
 			envConfig.GrpcDB.Host,
 			envConfig.GrpcDB.Port,
